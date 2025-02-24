@@ -35,7 +35,11 @@ export default function Viewpost({params}:{params:Promise<{id:string}>}) {
 
     return(
         <div className="p-[20px]">
-            <div className="contentview" dangerouslySetInnerHTML={{ __html: content }} />
+            {content ? 
+                <div className="contentview" dangerouslySetInnerHTML={{ __html: content }} />
+                :
+                <p className="text-center">Loading...</p>
+            }
         </div>
     );
 }

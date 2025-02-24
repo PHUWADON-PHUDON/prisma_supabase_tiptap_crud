@@ -17,16 +17,6 @@ export default function Tiptap({content,setcontent,setinputfile}:any) {
 
     //!
 
-    //!check content when update
-
-    useEffect(() => {
-        if (editor) {
-            editor.commands.setContent(content);
-        }
-    },[editor,content]);
-
-    //!
-
     //!add image and create blob
 
     const addImage = useCallback( async (event:any) => {

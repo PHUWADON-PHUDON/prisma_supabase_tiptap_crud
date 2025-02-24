@@ -86,7 +86,7 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
             <h1 className="text-[40px] font-bold">Edit Post</h1>
             <h2 className="mt-[20px] font-bold">Input Title:</h2>
             <input onChange={(e:any) => setinputtitle(e.target.value)} value={inputtitle} type="text" className="border mt-[10px] pl-[10px] focus:outline-none"/>
-            <Tiptap content={content} setcontent={setcontent} setinputfile={setinputfile}/>
+            {content ? <Tiptap content={content} setcontent={setcontent} setinputfile={setinputfile}/>:""}
             <button onClick={() => edit()} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[30px]">Edit Post</button>
         </div>
     );
