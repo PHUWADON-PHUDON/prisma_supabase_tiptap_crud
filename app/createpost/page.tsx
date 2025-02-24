@@ -8,10 +8,10 @@ export default function Createpost() {
     const [inputtitle,setinputtitle] = useState<string>("");
     const [inputfile,setinputfile] = useState<any>([]);
     const [content,setcontent] = useState<string>("<p>สวัสดี! เริ่มเขียนได้เลย</p>");
-    const router = useRouter();
+    const router:any = useRouter();
 
     const createPost = useCallback( async () => {
-        const abortcontroller = new AbortController();
+        const abortcontroller:any = new AbortController();
 
         try{
             if (inputtitle !== "") {

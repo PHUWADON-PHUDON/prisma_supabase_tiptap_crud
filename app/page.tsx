@@ -1,16 +1,24 @@
 "use client";
-import { useState,useEffect, useCallback } from "react";
+import {useState,useEffect} from "react";
 import Link from "next/link";
 import axios from "axios";
+import moment from "moment";
+
+interface PostsType {
+  id:number;
+  title:string;
+  content:string;
+  createAt:string
+}
 
 export default function Home() {
-  const [content,setcontent] = useState<any>([]);
+  const [content,setcontent] = useState<PostsType[]>([]);
   const [waitdata,setwaitdata] = useState<boolean>(true);
 
   //!load data
 
   useEffect(() => {
-    const abortcontroller:any = new AbortController();
+    const abortcontroller:AbortController = new AbortController();
 
     const loaddata = async () => {
       try{
@@ -35,8 +43,8 @@ export default function Home() {
 
   //!delete post
 
-  const deletePost = useCallback( async (id:number) => {
-    const abortcontroller:any = new AbortController();
+  const deletePost = async (id:number) => {
+    const abortcontroller:AbortController = new AbortController();
 
     const response:any = await axios.delete(`/api/delete/${id}`,{signal:abortcontroller.signal});
     if (response.status === 200) {
@@ -44,7 +52,7 @@ export default function Home() {
     }
 
     return () => abortcontroller.abort();
-  },[])
+  }
 
   //!
 
@@ -56,16 +64,14 @@ export default function Home() {
           <thead>
             <tr>
               <th className="w-[33%]">Posts Name</th>
-              <th className="w-[33%]">Create At</th>
               <th className="w-[33%]">Option</th>
             </tr>
           </thead>
           <tbody>
             {content.length > 0 ? 
-              (content.map((e:any,i:number) => (
+              (content.map((e:PostsType,i:number) => (
                 <tr key={i} className="border-b">
-                  <td className="text-center p-[20px_0]"><Link href={`/viewpost/${e.id}`}>{e.title}</Link></td>
-                  <td className="text-center p-[20px_0]">{e.createAt}</td>
+                  <td className="text-center p-[20px_0]"><Link className="text-[#4e8cf1] font-bold underline" href={`/viewpost/${e.id}`}>{e.title}</Link></td>
                   <td className="text-center p-[20px_0]">
                     <Link href={`/edit/${e.id}`} className="mr-[10px] text-[#d0ca0b]">Edit</Link>
                     <button onClick={() => deletePost(e.id)} className="mr-[10px] text-[#e03106]">Delete</button>
@@ -74,9 +80,7 @@ export default function Home() {
               )))
               :
               <tr>
-                <td></td>
-                <td className="text-center p-[20px_0]">No Post!</td>
-                <td></td>
+                <td colSpan={2} className="text-center p-[20px_0]">No Post!</td>
               </tr>
             }
           </tbody>
