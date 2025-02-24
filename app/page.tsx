@@ -1,101 +1,75 @@
-import Image from "next/image";
+"use client";
+import { useState,useEffect, useCallback } from "react";
+import Link from "next/link";
+import axios from "axios";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [content,setcontent] = useState<any>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  //!load data
+
+  useEffect(() => {
+    const abortcontroller:any = new AbortController();
+
+    const loaddata = async () => {
+      try{
+        const response:any = await axios.get("/api/getposts",{signal:abortcontroller.signal});
+        if (response.status === 200) {
+          setcontent(response.data);
+        }
+      }
+      catch(err) {
+        console.log(err);
+      }
+    }
+
+    loaddata();
+
+    return () => abortcontroller.abort();
+  },[]);
+
+  //!
+
+  //!delete post
+
+  const deletePost = useCallback( async (id:number) => {
+    const abortcontroller:any = new AbortController();
+
+    const response:any = await axios.delete(`/api/delete/${id}`,{signal:abortcontroller.signal});
+    if (response.status === 200) {
+      
+    }
+
+    return () => abortcontroller.abort();
+  },[])
+
+  //!
+
+  return (
+    <div className="p-[20px]">
+      <h1 className="text-[40px] font-bold">My Post</h1>
+      <table className="w-[100%] mt-[30px]">
+        <thead>
+          <tr>
+            <th className="w-[33%]">Posts Name</th>
+            <th className="w-[33%]">Create At</th>
+            <th className="w-[33%]">Option</th>
+          </tr>
+        </thead>
+        <tbody>
+          {content.map((e:any,i:number) => (
+            <tr key={i} className="border-b">
+              <td className="text-center p-[20px_0]"><Link href={`/viewpost/${e.id}`}>{e.title}</Link></td>
+              <td className="text-center p-[20px_0]">{e.createAt}</td>
+              <td className="text-center p-[20px_0]">
+                <Link href={`/edit/${e.id}`} className="mr-[10px] text-[#d0ca0b]">Edit</Link>
+                <button onClick={() => deletePost(e.id)} className="mr-[10px] text-[#e03106]">Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Link href={"/createpost"} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[50px]">Create Post</Link>
     </div>
   );
 }
