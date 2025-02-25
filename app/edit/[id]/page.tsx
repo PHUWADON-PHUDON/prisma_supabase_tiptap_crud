@@ -1,21 +1,36 @@
 "use client";
-import { useState,useCallback,useEffect } from "react";
+import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
-import Tiptap from "@/components/Tiptap";
+import dynamic from "next/dynamic";
 import axios from "axios";
+const Tiptap:any = dynamic(() => import('@/components/Tiptap'), {ssr:false,loading: () => <p className="mt-[50px] text-center">Loading...</p>});
+
+interface ImageFileType {
+    file:File;
+    blob:string;
+}
+
+interface Image {
+    id: number;
+    imagename:string;
+    postid:number;
+    createAt:string;
+}
 
 export default function Edit({params}:{params:Promise<{id:string}>}) {
     const [inputtitle,setinputtitle] = useState<string>("");
-    const [inputfile,setinputfile] = useState<any>([]);
+    const [inputfile,setinputfile] = useState<ImageFileType[]>([]);
     const [content,setcontent] = useState<string>("");
-    const [findimagesdelete,setfindimagesdelete] = useState<any>([]);
+    const [findimagesdelete,setfindimagesdelete] = useState<Image[]>([]);
+    const [waitedit,setwaitedit] = useState<boolean>(false);
+    const router:any = useRouter();
     const {id} = use(params);
 
     //!load data
 
     useEffect(() => {
-        const abortcontroller:any = new AbortController();
+        const abortcontroller:AbortController = new AbortController();
 
         const loaddata = async () => {
             try{
@@ -40,36 +55,38 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
 
     //!send edit post
 
-    const edit = useCallback( async () => {
-        const abortcontroller:any = new AbortController();
+    const edit = async () => {
+        const abortcontroller:AbortController = new AbortController();
 
         try {
-            const newinputfile:any = inputfile.filter((e:any) => {
+            const newinputfile:ImageFileType[] = inputfile.filter((e:ImageFileType) => {
                 if (content.includes(e.blob)) {
                     return(e);
                 }
             });
 
-            const newfindimagesdelete:any = findimagesdelete.filter((e:any) => {
+            const newfindimagesdelete:Image[] = findimagesdelete.filter((e:Image) => {
                 if (!content.includes(e.imagename)) {
                     return(e);
                 }
             });
 
-            const formdata:any = new FormData();
+            const formdata:FormData = new FormData();
             formdata.append("inputtitle",inputtitle);
             formdata.append("content",content);
-            newinputfile.forEach((file:any) => {
+            newinputfile.forEach((file:ImageFileType) => {
                 formdata.append("images",file.file);
                 formdata.append("blobs",file.blob);
             });
-            newfindimagesdelete.forEach((imagename:any) => {
-                formdata.append("finddelete",imagename.id);
+            newfindimagesdelete.forEach((imagename:Image) => {
+                formdata.append("finddelete",imagename.id.toString());
             });
+
+            setwaitedit(true);
 
            const response:any = await axios.put(`/api/upload/${id}`,formdata,{headers:{'content-type':'multipart/form-data'},signal:abortcontroller.signal});
            if (response.status === 200) {
-              //
+            router.push("/");
            }
         }
         catch(err) {
@@ -77,7 +94,7 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
         }
 
         return () => abortcontroller.abort();
-    },[inputtitle,inputfile,content,findimagesdelete])
+    }
 
     //!
 
@@ -86,8 +103,14 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
             <h1 className="text-[40px] font-bold">Edit Post</h1>
             <h2 className="mt-[20px] font-bold">Input Title:</h2>
             <input onChange={(e:any) => setinputtitle(e.target.value)} value={inputtitle} type="text" className="border mt-[10px] pl-[10px] focus:outline-none"/>
-            {content ? <Tiptap content={content} setcontent={setcontent} setinputfile={setinputfile}/>:""}
-            <button onClick={() => edit()} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[30px]">Edit Post</button>
+            {content ? 
+                <>
+                <Tiptap content={content} setcontent={setcontent} setinputfile={setinputfile}/>
+                {waitedit ? <p className="inline-block p-[10px_1.5rem] mt-[30px]">Loading...</p>:<button onClick={() => edit()} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[30px]">Edit Post</button>}
+                </>
+                :
+                <p className="mt-[50px] text-center">Loading...</p>
+            }
         </div>
     );
 }

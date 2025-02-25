@@ -1,47 +1,59 @@
 "use client";
-import { useState,useCallback } from "react";
+import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Tiptap from "@/components/Tiptap";
 import axios from "axios";
+import dynamic from "next/dynamic";
+const Tiptap:any = dynamic(() => import('@/components/Tiptap'), {ssr:false,loading: () => <p className="mt-[50px] text-center">Loading...</p>});
+
+interface ImageFileType {
+    file:File;
+    blob:string;
+}
 
 export default function Createpost() {
     const [inputtitle,setinputtitle] = useState<string>("");
-    const [inputfile,setinputfile] = useState<any>([]);
+    const [inputfile,setinputfile] = useState<ImageFileType[]>([]);
     const [content,setcontent] = useState<string>("<p>สวัสดี! เริ่มเขียนได้เลย</p>");
+    const [waitcreate,setwaitcreate] = useState<boolean>(false);
     const router:any = useRouter();
 
-    const createPost = useCallback( async () => {
-        const abortcontroller:any = new AbortController();
+    //!create post
 
-        try{
-            if (inputtitle !== "") {
-                const newinputfile = inputfile.filter((e:any) => {
+    const createPost = async () => {
+        const abortcontroller:AbortController = new AbortController();
+
+        if (inputtitle !== "" && content !== "") {
+            try{
+                const newinputfile:ImageFileType[] = inputfile.filter((e:ImageFileType) => {
                     if (content.includes(e.blob)) {
                         return(e);
                     }
                 });
 
-                const formdata = new FormData();
+                const formdata:FormData = new FormData();
                 formdata.append("inputtitle",inputtitle);
                 formdata.append("content",content);
-                newinputfile.forEach((file:any) => {
+                newinputfile.forEach((file:ImageFileType) => {
                     formdata.append("images",file.file);
                     formdata.append("blobs",file.blob);
                 });
 
-                const response = await axios.post("/api/upload",formdata,{headers:{'content-type':'multipart/form-data'},signal:abortcontroller.signal});
+                setwaitcreate(true);
+
+                const response:any = await axios.post("/api/upload",formdata,{headers:{'content-type':'multipart/form-data'},signal:abortcontroller.signal});
                 if (response.status === 200) {
                     router.push("/");
                 }
             }
-            //console.log(inputfile);
-        }
-        catch(err) {
-            console.log(err);
+            catch(err) {
+                console.log(err);
+            }
         }
 
         return () => abortcontroller.abort();
-    },[inputtitle,content]);
+    };
+
+    //!
 
     return(
         <div className="m-[20px]">
@@ -49,7 +61,11 @@ export default function Createpost() {
             <h2 className="mt-[20px] font-bold">Input Title:</h2>
             <input onChange={(e:any) => setinputtitle(e.target.value)} type="text" className="border mt-[10px] pl-[10px] focus:outline-none"/>
             <Tiptap content={content} setcontent={setcontent} setinputfile={setinputfile}/>
-            <button onClick={() => createPost()} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[30px]">Create Post</button>
+            {waitcreate ? 
+                <p className="p-[10px_1.5rem] mt-[30px]">Create...</p>
+                :
+                <button onClick={() => createPost()} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[30px]">Create Post</button>
+            }
         </div>
     );
 }

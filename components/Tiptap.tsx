@@ -1,11 +1,21 @@
 "use client";
-import { useState,useRef,useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react'
-import axios from 'axios';
 import StarterKit from '@tiptap/starter-kit';
 import Image from "@tiptap/extension-image";
 
-export default function Tiptap({content,setcontent,setinputfile}:any) {
+interface ImageItem {
+    file:File;
+    blob:string;
+}
+
+interface ContentType {
+    content:string;
+    setcontent:React.Dispatch<React.SetStateAction<string>>;
+    setinputfile:React.Dispatch<React.SetStateAction<ImageItem[]>>;
+}
+
+export default function Tiptap({content,setcontent,setinputfile}:ContentType) {
 
     //!init editor
 
@@ -19,8 +29,8 @@ export default function Tiptap({content,setcontent,setinputfile}:any) {
 
     //!add image and create blob
 
-    const addImage = useCallback( async (event:any) => {
-        const file:any = event.target.files[0];
+    const addImage = useCallback( async (event:React.ChangeEvent<HTMLInputElement>) => {
+        const file:File = event.target.files![0];
 
         if (file) {
             if (!editor) {
@@ -28,7 +38,7 @@ export default function Tiptap({content,setcontent,setinputfile}:any) {
             }
 
             try{
-                const clienturl = URL.createObjectURL(file);
+                const clienturl:string = URL.createObjectURL(file);
                 editor.chain().focus().setImage({ src: clienturl }).run();
                 setinputfile((prev:any) => [...prev,{file:file,blob:clienturl}]);
             }

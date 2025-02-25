@@ -1,7 +1,5 @@
 "use client";
 import { useState,useEffect } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import { use } from "react";
 import axios from "axios";
 
@@ -12,7 +10,7 @@ export default function Viewpost({params}:{params:Promise<{id:string}>}) {
     //!loaddata
 
     useEffect(() => {
-        const abortcontroller:any = new AbortController();
+        const abortcontroller:AbortController = new AbortController();
         
         const loaddata = async () => {
             try{

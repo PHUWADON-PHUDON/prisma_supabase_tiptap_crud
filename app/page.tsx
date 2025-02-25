@@ -14,41 +14,53 @@ interface PostsType {
 export default function Home() {
   const [content,setcontent] = useState<PostsType[]>([]);
   const [waitdata,setwaitdata] = useState<boolean>(true);
+  const [waitdelete,setwaitdelete] = useState<boolean>(true);
 
   //!load data
 
-  useEffect(() => {
+  const loaddata = async () => {
     const abortcontroller:AbortController = new AbortController();
 
-    const loaddata = async () => {
-      try{
-        setwaitdata(true);
-        const response:any = await axios.get("/api/getposts",{signal:abortcontroller.signal});
-        if (response.status === 200) {
-          setcontent(response.data);
-          setwaitdata(false);
-        }
-      }
-      catch(err) {
-        console.log(err);
+    try{
+      setwaitdata(true);
+      const response:any = await axios.get("/api/getposts",{signal:abortcontroller.signal});
+      if (response.status === 200) {
+        setcontent(response.data);
+        setwaitdata(false);
       }
     }
-
-    loaddata();
+    catch(err) {
+      console.log(err);
+    }
 
     return () => abortcontroller.abort();
+  }
+
+  useEffect(() => {
+    loaddata();
   },[]);
 
   //!
 
   //!delete post
 
-  const deletePost = async (id:number) => {
+  const deletePost = async (id:number,title:string) => {
     const abortcontroller:AbortController = new AbortController();
 
-    const response:any = await axios.delete(`/api/delete/${id}`,{signal:abortcontroller.signal});
-    if (response.status === 200) {
-      
+    const confirmdelete:boolean = confirm(`Delete ${title}`);
+
+    if (confirmdelete) {
+      try{
+        setwaitdelete(false)
+        const response:any = await axios.delete(`/api/delete/${id}`,{signal:abortcontroller.signal});
+        if (response.status === 200) {
+          loaddata();
+          setwaitdelete(true);
+        }
+      }
+      catch(err) {
+        console.log(err);
+      }
     }
 
     return () => abortcontroller.abort();
@@ -60,6 +72,7 @@ export default function Home() {
     <div className="p-[20px]">
       <h1 className="text-[40px] font-bold">My Post</h1>
       {!waitdata ? 
+        <>
         <table className="w-[100%] mt-[30px]">
           <thead>
             <tr>
@@ -74,7 +87,7 @@ export default function Home() {
                   <td className="text-center p-[20px_0]"><Link className="text-[#4e8cf1] font-bold underline" href={`/viewpost/${e.id}`}>{e.title}</Link></td>
                   <td className="text-center p-[20px_0]">
                     <Link href={`/edit/${e.id}`} className="mr-[10px] text-[#d0ca0b]">Edit</Link>
-                    <button onClick={() => deletePost(e.id)} className="mr-[10px] text-[#e03106]">Delete</button>
+                    <button onClick={() => deletePost(e.id,e.title)} className="mr-[10px] text-[#e03106]">Delete</button>
                   </td>
                 </tr>
               )))
@@ -85,10 +98,15 @@ export default function Home() {
             }
           </tbody>
         </table>
+        {waitdelete ? 
+          <Link href={"/createpost"} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[50px]">Create Post</Link>
+          :
+          <p className="inline-block p-[10px_1.5rem] mt-[50px]">Loading...</p>
+        }
+        </>
         :
         <p className="mt-[50px] text-center">Loading...</p>
       }
-      <Link href={"/createpost"} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[50px]">Create Post</Link>
     </div>
   );
 }
