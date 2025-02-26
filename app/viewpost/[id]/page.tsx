@@ -14,7 +14,7 @@ export default function Viewpost({params}:{params:Promise<{id:string}>}) {
         
         const loaddata = async () => {
             try{
-                const response:any = await axios.get(`/api/getposts/${id}`,{signal:abortcontroller.signal});
+                const response = await axios.get(`/api/getposts/${id}`,{signal:abortcontroller.signal});
                 if (response.status === 200) {
                     setcontent(response.data.content);
                 }

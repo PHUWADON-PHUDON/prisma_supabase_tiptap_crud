@@ -23,7 +23,7 @@ export default function Home() {
 
     try{
       setwaitdata(true);
-      const response:any = await axios.get("/api/getposts",{signal:abortcontroller.signal});
+      const response = await axios.get("/api/getposts",{signal:abortcontroller.signal});
       if (response.status === 200) {
         setcontent(response.data);
         setwaitdata(false);
@@ -52,7 +52,7 @@ export default function Home() {
     if (confirmdelete) {
       try{
         setwaitdelete(false)
-        const response:any = await axios.delete(`/api/delete/${id}`,{signal:abortcontroller.signal});
+        const response = await axios.delete(`/api/delete/${id}`,{signal:abortcontroller.signal});
         if (response.status === 200) {
           loaddata();
           setwaitdelete(true);

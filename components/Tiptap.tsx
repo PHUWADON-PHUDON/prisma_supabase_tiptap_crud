@@ -1,5 +1,5 @@
 "use client";
-import { useCallback } from 'react';
+import { useEffect,useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit';
 import Image from "@tiptap/extension-image";
@@ -13,17 +13,24 @@ interface ContentType {
     content:string;
     setcontent:React.Dispatch<React.SetStateAction<string>>;
     setinputfile:React.Dispatch<React.SetStateAction<ImageItem[]>>;
+    setisload:React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function Tiptap({content,setcontent,setinputfile}:ContentType) {
+export default function Tiptap({content,setcontent,setinputfile,setisload = () => null}:ContentType) {
 
-    //!init editor
+    //!init editor and check load
 
     const editor = useEditor({
         extensions: [StarterKit,Image.configure({HTMLAttributes:{loading:"lazy"}})],
         content:content,
         onUpdate:({editor}) => setcontent(editor.getHTML())
     });
+
+    useEffect(() => {
+        if (editor) {
+            setisload(true);
+        }
+    },[editor])
 
     //!
 
@@ -33,14 +40,12 @@ export default function Tiptap({content,setcontent,setinputfile}:ContentType) {
         const file:File = event.target.files![0];
 
         if (file) {
-            if (!editor) {
-                return null;
-            }
+            if (!editor) return null;
 
             try{
                 const clienturl:string = URL.createObjectURL(file);
                 editor.chain().focus().setImage({ src: clienturl }).run();
-                setinputfile((prev:any) => [...prev,{file:file,blob:clienturl}]);
+                setinputfile((prev) => [...prev,{file:file,blob:clienturl}]);
             }
             catch(err) {
                 console.log(err);

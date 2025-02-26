@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { use } from "react";
 import dynamic from "next/dynamic";
 import axios from "axios";
-const Tiptap:any = dynamic(() => import('@/components/Tiptap'), {ssr:false,loading: () => <p className="mt-[50px] text-center">Loading...</p>});
+const Tiptap = dynamic(() => import('@/components/Tiptap'), {ssr:false,loading: () => <p className="mt-[50px] text-center">Loading...</p>});
 
 interface ImageFileType {
     file:File;
@@ -24,7 +24,8 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
     const [content,setcontent] = useState<string>("");
     const [findimagesdelete,setfindimagesdelete] = useState<Image[]>([]);
     const [waitedit,setwaitedit] = useState<boolean>(false);
-    const router:any = useRouter();
+    const [isload,setisload] = useState<boolean>(false);
+    const router = useRouter();
     const {id} = use(params);
 
     //!load data
@@ -34,7 +35,7 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
 
         const loaddata = async () => {
             try{
-                const response:any = await axios.get(`/api/getposts/${id}`); 
+                const response = await axios.get(`/api/getposts/${id}`); 
                 if (response.status === 200) {
                     setinputtitle(response.data.title);
                     setcontent(response.data.content);
@@ -84,7 +85,7 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
 
             setwaitedit(true);
 
-           const response:any = await axios.put(`/api/upload/${id}`,formdata,{headers:{'content-type':'multipart/form-data'},signal:abortcontroller.signal});
+           const response = await axios.put(`/api/upload/${id}`,formdata,{headers:{'content-type':'multipart/form-data'},signal:abortcontroller.signal});
            if (response.status === 200) {
             router.push("/");
            }
@@ -102,11 +103,15 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
         <div className="m-[20px]">
             <h1 className="text-[40px] font-bold">Edit Post</h1>
             <h2 className="mt-[20px] font-bold">Input Title:</h2>
-            <input onChange={(e:any) => setinputtitle(e.target.value)} value={inputtitle} type="text" className="border mt-[10px] pl-[10px] focus:outline-none"/>
+            <input onChange={(e:React.ChangeEvent<HTMLInputElement>) => setinputtitle(e.target.value)} value={inputtitle} type="text" className="border mt-[10px] pl-[10px] focus:outline-none"/>
             {content ? 
                 <>
-                <Tiptap content={content} setcontent={setcontent} setinputfile={setinputfile}/>
-                {waitedit ? <p className="inline-block p-[10px_1.5rem] mt-[30px]">Loading...</p>:<button onClick={() => edit()} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[30px]">Edit Post</button>}
+                <Tiptap content={content} setcontent={setcontent} setinputfile={setinputfile} setisload={setisload}/>
+                {waitedit ? 
+                    <p className="inline-block p-[10px_1.5rem] mt-[30px]">Loading...</p>
+                    :
+                    (isload ? <button onClick={() => edit()} className="bg-[#4e8cf1] text-[#fff] inline-block p-[10px_1.5rem] font-bold rounded-[8px] mt-[30px]">Edit Post</button>:"")
+                }
                 </>
                 :
                 <p className="mt-[50px] text-center">Loading...</p>
