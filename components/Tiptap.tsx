@@ -3,6 +3,7 @@ import { useEffect,useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit';
 import Image from "@tiptap/extension-image";
+//import imageCompression from 'browser-image-compression';
 
 interface ImageItem {
     file:File;
@@ -39,10 +40,16 @@ export default function Tiptap({content,setcontent,setinputfile,setisload = () =
     const addImage = useCallback( async (event:React.ChangeEvent<HTMLInputElement>) => {
         const file:File = event.target.files![0];
 
+        // const options = {
+        //     maxSizeMB: 0.5,
+        //     useWebWorker: true,
+        // }
+
         if (file) {
             if (!editor) return null;
 
             try{
+                //const compressedfile = await imageCompression(file,options);
                 const clienturl:string = URL.createObjectURL(file);
                 editor.chain().focus().setImage({ src: clienturl }).run();
                 setinputfile((prev) => [...prev,{file:file,blob:clienturl}]);

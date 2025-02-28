@@ -56,8 +56,6 @@ export default function Createpost() {
 
     //!
 
-    console.log(Tiptap);
-
     return(
         <div className="m-[20px]">
             <h1 className="text-[40px] font-bold">Create Post</h1>

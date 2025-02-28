@@ -1,6 +1,7 @@
 import { NextRequest,NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { PrismaClient } from "@prisma/client";
+import sharp from "sharp";
 const prisma:PrismaClient = new PrismaClient();
 const supabaseUrl:string = process.env.SUPABASE_URL || "";
 const supabaseKey:string = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -53,8 +54,12 @@ export async function PUT(req:NextRequest,{params}:{params:Promise<{id:string}>}
 
         if (images.length > 0) {
             uploadpromise = await Promise.all(images.map( async (file:File,i:number) => {
+                const buffer = Buffer.from(await file.arrayBuffer());
+                const compressedBuffer = await sharp(buffer).jpeg({ quality: 50 }).toBuffer();
+                const compressedFile = new File([compressedBuffer], file.name, { type: "image/jpeg" });
+
                 const filePath:string = `${generateUniqueFileName()}`;
-                const uploadfile = await supabase.storage.from("interstellar_image").upload(filePath,file);
+                const uploadfile = await supabase.storage.from("interstellar_image").upload(filePath,compressedFile);
                 const { data } = supabase.storage.from("interstellar_image").getPublicUrl(filePath);
                 const imageurl:string = data.publicUrl;
                 return({imageurl:imageurl,blob:blobs[i],filename:filePath});
