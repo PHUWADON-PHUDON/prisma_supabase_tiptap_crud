@@ -50,7 +50,7 @@ export default function Edit({params}:{params:Promise<{id:string}>}) {
         loaddata();
 
         return () => abortcontroller.abort();
-    },[]);
+    },[id]);
 
     //!
 
