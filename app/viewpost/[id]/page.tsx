@@ -3,9 +3,9 @@ import { useState,useEffect } from "react";
 import { use } from "react";
 import axios from "axios";
 
-export default function Viewpost({params}:{params:Promise<{id:string}>}) {
+export default function Viewpost() {//{params}:{params:Promise<{id:string}>}
     const [content,setcontent] = useState<string>("");
-    const {id} = use(params);
+    //const {id} = use(params);
 
     //!loaddata
 
