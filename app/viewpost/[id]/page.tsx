@@ -3,31 +3,31 @@ import { useState,useEffect } from "react";
 import { use } from "react";
 import axios from "axios";
 
-export default function Viewpost() {//{params}:{params:Promise<{id:string}>}
+export default function Viewpost({params}:{params:Promise<{id:string}>}) {
     const [content,setcontent] = useState<string>("");
-    //const {id} = use(params);
+    const {id} = use(params);
 
     //!loaddata
 
-    // useEffect(() => {
-    //     const abortcontroller:AbortController = new AbortController();
+    useEffect(() => {
+        const abortcontroller:AbortController = new AbortController();
         
-    //     const loaddata = async () => {
-    //         try{
-    //             const response = await axios.get(`/api/getposts/${id}`,{signal:abortcontroller.signal});
-    //             if (response.status === 200) {
-    //                 setcontent(response.data.content);
-    //             }
-    //         }
-    //         catch(err) {
-    //             console.log(err);
-    //         }
-    //     }
+        const loaddata = async () => {
+            try{
+                const response = await axios.get(`/api/getposts/${id}`,{signal:abortcontroller.signal});
+                if (response.status === 200) {
+                    setcontent(response.data.content);
+                }
+            }
+            catch(err) {
+                console.log(err);
+            }
+        }
 
-    //     loaddata();
+        loaddata();
 
-    //     return () => abortcontroller.abort();
-    // },[])
+        return () => abortcontroller.abort();
+    },[])
 
     //!
 
