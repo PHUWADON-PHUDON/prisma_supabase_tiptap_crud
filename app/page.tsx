@@ -1,5 +1,6 @@
 "use client";
 import {useState,useEffect} from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import moment from "moment";
@@ -15,6 +16,7 @@ export default function Home() {
   const [content,setcontent] = useState<PostsType[]>([]);
   const [waitdata,setwaitdata] = useState<boolean>(true);
   const [waitdelete,setwaitdelete] = useState<boolean>(true);
+  const router = useRouter();
 
   //!load data
 
@@ -67,6 +69,7 @@ export default function Home() {
   }
 
   //!
+  // <Link className="text-[#4e8cf1] font-bold underline" href={`/viewpost/${e.id}`}>{e.title}</Link>
 
   return (
     <div className="p-[20px]">
@@ -84,7 +87,7 @@ export default function Home() {
             {content.length > 0 ? 
               (content.map((e:PostsType,i:number) => (
                 <tr key={i} className="border-b">
-                  <td className="text-center p-[20px_0]"><Link className="text-[#4e8cf1] font-bold underline" href={`/viewpost/${e.id}`}>{e.title}</Link></td>
+                  <td className="text-center p-[20px_0]"><button onClick={() => router.push(`/viewpost/${e.id}`)}>{e.title}</button></td>
                   <td className="text-center p-[20px_0]">
                     <Link href={`/edit/${e.id}`} className="mr-[10px] text-[#d0ca0b]">Edit</Link>
                     <button onClick={() => deletePost(e.id,e.title)} className="mr-[10px] text-[#e03106]">Delete</button>
