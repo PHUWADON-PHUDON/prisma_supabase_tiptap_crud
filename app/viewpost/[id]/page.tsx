@@ -9,25 +9,25 @@ export default function Viewpost({params}:{params:Promise<{id:string}>}) {
 
     //!loaddata
 
-    useEffect(() => {
-        const abortcontroller:AbortController = new AbortController();
+    // useEffect(() => {
+    //     const abortcontroller:AbortController = new AbortController();
         
-        const loaddata = async () => {
-            try{
-                const response = await axios.get(`/api/getposts/${id}`,{signal:abortcontroller.signal});
-                if (response.status === 200) {
-                    setcontent(response.data.content);
-                }
-            }
-            catch(err) {
-                console.log(err);
-            }
-        }
+    //     const loaddata = async () => {
+    //         try{
+    //             const response = await axios.get(`/api/getposts/${id}`,{signal:abortcontroller.signal});
+    //             if (response.status === 200) {
+    //                 setcontent(response.data.content);
+    //             }
+    //         }
+    //         catch(err) {
+    //             console.log(err);
+    //         }
+    //     }
 
-        loaddata();
+    //     loaddata();
 
-        return () => abortcontroller.abort();
-    },[])
+    //     return () => abortcontroller.abort();
+    // },[])
 
     //!
 
